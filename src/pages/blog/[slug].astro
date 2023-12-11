@@ -1,0 +1,41 @@
+---
+import fetchApi from '../../lib/strapi';
+import type Article from '../../interfaces/article';
+import { marked } from 'marked';
+
+export async function getStaticPaths() {
+  const articles = await fetchApi<Article[]>({
+    endpoint: 'articles',
+    wrappedByKey: 'data',
+  });
+
+  return articles.map((article) => ({
+    params: { slug: article.attributes.slug },
+    props: article,
+  }));
+}
+type Props = Article;
+
+const article = Astro.props;
+const content = marked.parse(article.attributes.content);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{article.attributes.title}</title>
+  </head>
+
+  <body>
+    <main class="container mx-auto my-8">
+
+      <div class="prose prose-slate prose-lg">
+      <h1>{article.attributes.title}</h1>
+      <article set:html={content} />    
+      </div>
+
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        <a href="/">Home</a>
+    </main>
+  </body> 
+</html>
